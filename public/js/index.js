@@ -54,3 +54,8 @@ locationButton.on('click', function () {
     alert('Δε μπόρεσα να βρω τη θέση σου.')
   });
 });
+
+var weatherButton = jQuery('#send-weather');
+weatherButton.on('click', function () {
+  socket.emit('createWeatherMessage');
+});

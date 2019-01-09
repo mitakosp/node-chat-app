@@ -17,21 +17,6 @@ app.use(express.static(publicPath));
 io.on('connection', (socket) => {
   console.log('Connected to server');
 
-  // var weatherURL = 'https://api.darksky.net/forecast/011467c028347864ea183a0031ac9a66/37.9847,23.855065?lang=el&units=auto';
-  // axios.get(weatherURL)
-  // .then((response) => {
-  //   var weatherMessage = `Αυτή τη στιγμή ο καιρός είναι ${response.data.currently.summary}, η θερμοκρασία ${response.data.currently.temperature}°C και η υγρασία ${response.data.currently.humidity * 100}%.`;
-  //   socket.emit('newMessage', generateMessage('Admin', weatherMessage));
-  // })
-  // .catch((e) => {
-  //   if (e.code === 'ENOTFOUND') {
-  //     console.log('Unable to connect to mapquestapi');
-  //   }
-  //   else {
-  //     console.log(e.message);
-  //   }
-  // });
-
   socket.emit('newMessage', generateMessage('Admin', 'Welcome to the Chat App!'));
 
   socket.broadcast.emit('newMessage', generateMessage('Admin', 'New User joined!'));
@@ -44,6 +29,23 @@ io.on('connection', (socket) => {
 
   socket.on('createLocationMessage', (coords) => {
     io.emit('newLocationMessage', generateLocationMessage('Admin', coords.latitude, coords.longitude))
+  });
+
+  socket.on('createWeatherMessage', () => {
+    var weatherURL = 'https://api.darksky.net/forecast/011467c028347864ea183a0031ac9a66/37.9847,23.855065?lang=el&units=auto';
+    axios.get(weatherURL)
+    .then((response) => {
+      var weatherMessage = `Αυτή τη στιγμή ο καιρός είναι ${response.data.currently.summary}, η θερμοκρασία ${response.data.currently.temperature}°C και η υγρασία ${response.data.currently.humidity * 100}%.`;
+      socket.emit('newMessage', generateMessage('Admin', weatherMessage));
+    })
+    .catch((e) => {
+      if (e.code === 'ENOTFOUND') {
+        console.log('Unable to connect to mapquestapi');
+      }
+      else {
+        console.log(e.message);
+      }
+    });
   });
 
   socket.on('disconnect', () => {
