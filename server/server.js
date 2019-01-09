@@ -17,18 +17,18 @@ app.use(express.static(publicPath));
 io.on('connection', (socket) => {
   console.log('Connected to server');
 
-  socket.emit('newMessage', generateMessage('Admin', 'Welcome to the Chat App!'));
+  socket.emit('newMessage', generateMessage('Χρήστης', 'Καλως ήρθες στη συνομιλία μας!'));
 
-  socket.broadcast.emit('newMessage', generateMessage('Admin', 'New User joined!'));
+  socket.broadcast.emit('newMessage', generateMessage('Χρήστης', 'New User joined!'));
 
   socket.on('createMessage', (message, callback) => {
     console.log('new message from client', message);
     io.emit('newMessage',  generateMessage(message.from, message.text));
-    callback('This is from the server');
+    callback();
   });
 
   socket.on('createLocationMessage', (coords) => {
-    io.emit('newLocationMessage', generateLocationMessage('Admin', coords.latitude, coords.longitude))
+    io.emit('newLocationMessage', generateLocationMessage('Χρήστης', coords.latitude, coords.longitude))
   });
 
   socket.on('createWeatherMessage', () => {

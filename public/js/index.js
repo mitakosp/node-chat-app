@@ -31,11 +31,13 @@ socket.on('newLocationMessage', function (message) {
 jQuery('#message-form').on('submit', function (e) {
   e.preventDefault();
 
+  var messageTextbox = jQuery('[name=message]');
+
   socket.emit('createMessage', {
     from: 'User',
-    text: jQuery('[name=message]').val()
+    text: messageTextbox.val()
   }, function () {
-
+    messageTextbox.val('');
   });
 });
 
@@ -45,12 +47,16 @@ locationButton.on('click', function () {
     return alert('Δεν εχεις δώσει δικαίωμα για την τοποθεσία σου.');
   }
 
+  locationButton.attr('disabled', 'disabled').text('Περίμενε...')
+
   navigator.geolocation.getCurrentPosition(function (position) {
+    locationButton.removeAttr('disabled').text('Είμαι εδώ!')
     socket.emit('createLocationMessage', {
       latitude: position.coords.latitude,
       longitude: position.coords.longitude
     });
   }, function (e) {
+    locationButton.removeAttr('disabled').text('Είμαι εδώ!')
     alert('Δε μπόρεσα να βρω τη θέση σου.')
   });
 });
