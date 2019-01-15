@@ -18,14 +18,16 @@ app.use(express.static(publicPath));
 io.on('connection', (socket) => {
   console.log('Connected to server');
 
-  socket.emit('newMessage', generateMessage('Χρήστης', 'Καλως ήρθες στη συνομιλία μας!'));
-
-  socket.broadcast.emit('newMessage', generateMessage('Χρήστης', 'New User joined!'));
-
   socket.on('join', (params, callback) => {
     if (!isRealString(params.name) || !isRealString(params.room)) {
       callback('Name and room name are required!');
     }
+
+    socket.join(params.room);
+
+    socket.emit('newMessage', generateMessage('Διαχειριστής', 'Καλως ήρθες στη συνομιλία μας!'));
+
+    socket.broadcast.to(params.room).emit('newMessage', generateMessage('Διαχειριστής', `Ο χρήστης ${params.name} μόλις μπήκε στη συνομιλία.`));
 
     callback();
   });
