@@ -5,6 +5,7 @@ const socketIO = require('socket.io');
 const axios = require('axios');
 
 const {generateMessage, generateLocationMessage} = require('./utils/message');
+const {isRealString} = require('./utils/validation');
 
 const publicPath = path.join(__dirname, '../public');
 const port = process.env.PORT || 3000;
@@ -20,6 +21,14 @@ io.on('connection', (socket) => {
   socket.emit('newMessage', generateMessage('Χρήστης', 'Καλως ήρθες στη συνομιλία μας!'));
 
   socket.broadcast.emit('newMessage', generateMessage('Χρήστης', 'New User joined!'));
+
+  socket.on('join', (params, callback) => {
+    if (!isRealString(params.name) || !isRealString(params.room)) {
+      callback('Name and room name are required!');
+    }
+
+    callback();
+  });
 
   socket.on('createMessage', (message, callback) => {
     console.log('new message from client', message);
