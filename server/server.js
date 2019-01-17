@@ -30,21 +30,28 @@ io.on('connection', (socket) => {
     users.addUser(socket.id, params.name, params.room);
 
     io.to(params.room).emit('updateUserList', users.getUserList(params.room));
-    socket.emit('newMessage', generateMessage('Διαχειριστής', 'Καλως ήρθες στη συνομιλία μας!'));
+    socket.emit('newMessage', generateMessage('Ρεσεψιονίστ', 'Καλως ήρθατε!'));
 
-    socket.broadcast.to(params.room).emit('newMessage', generateMessage('Διαχειριστής', `Ο χρήστης ${params.name} μόλις μπήκε στη συνομιλία.`));
+    socket.broadcast.to(params.room).emit('newMessage', generateMessage('Ρεσεψιονίστ', `Ο χρήστης ${params.name} μόλις μπήκε στη συνομιλία.`));
 
     callback();
   });
 
   socket.on('createMessage', (message, callback) => {
-    console.log('new message from client', message);
-    io.emit('newMessage',  generateMessage(message.from, message.text));
-    callback();
+    var user = users.getUser(socket.id);
+
+    if (user && isRealString(message.text)) {
+      io.to(user.room).emit('newMessage',  generateMessage(user.name, message.text));
+      callback();
+    }
   });
 
   socket.on('createLocationMessage', (coords) => {
-    io.emit('newLocationMessage', generateLocationMessage('Χρήστης', coords.latitude, coords.longitude))
+    var user = users.getUser(socket.id);
+
+    if (user) {
+      io.to(user.room).emit('newLocationMessage', generateLocationMessage(user.name, coords.latitude, coords.longitude))
+    }
   });
 
   socket.on('createWeatherMessage', () => {
@@ -52,7 +59,7 @@ io.on('connection', (socket) => {
     axios.get(weatherURL)
     .then((response) => {
       var weatherMessage = `Αυτή τη στιγμή ο καιρός είναι ${response.data.currently.summary}, η θερμοκρασία ${response.data.currently.temperature}°C και η υγρασία ${response.data.currently.humidity * 100}%.`;
-      socket.emit('newMessage', generateMessage('Admin', weatherMessage));
+      socket.emit('newMessage', generateMessage('Μετεωρολόγος', weatherMessage));
     })
     .catch((e) => {
       if (e.code === 'ENOTFOUND') {
@@ -69,7 +76,7 @@ io.on('connection', (socket) => {
 
     if (user) {
       io.to(user.room).emit('updateUserList', users.getUserList(user.room));
-      io.to(user.room).emit('newMessage', generateMessage('Διαχειριστής', `Ο χρήστης ${user.name} μόλις έφυγε.`));
+      io.to(user.room).emit('newMessage', generateMessage('Ρεσεψιονίστ', `Ο χρήστης ${user.name} μόλις έφυγε.`));
     }
   })
 });
